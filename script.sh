@@ -113,6 +113,5 @@ sudo systemctl restart nginx.service
 
 sudo certbot --nginx -m admin@$domain -d $domain
 
-sudo cat >> /var/spool/cron/crontabs/ubuntu << 'EOF'
-0 1 * * * /usr/bin/certbot renew & > /dev/null
-EOF
+(crontab -l ; echo "0 1 * * * /usr/bin/certbot renew & > /dev/null") | crontab
+
