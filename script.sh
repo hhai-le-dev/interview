@@ -52,6 +52,22 @@ sudo sed -i "s/database_name_here/wordpress/" $install_dir/wp-config.php
 sudo sed -i "s/username_here/wordpressuser/" $install_dir/wp-config.php
 sudo sed -i "s/password_here/password/" $install_dir/wp-config.php
 
+sudo mkdir -p /var/lib/letsencrypt/.well-known
+sudo chgrp www-data /var/lib/letsencrypt
+sudo chmod g+s /var/lib/letsencrypt
+
+cat > /tmp/certbotnginx << EOF
+  location ^~ /.well-known/acme-challenge/ {
+  allow all;
+  root /var/lib/letsencrypt/;
+  default_type "text/plain";
+  try_files $uri =404;
+}
+EOF
+
+
+sudo cp /tmp/certbotnginx /etc/nginx/snippets/well-known
+
 sudo cat > /tmp/$domain << EOF
 server {
     listen 80;
@@ -90,24 +106,10 @@ sudo touch /var/log/nginx/$domain.access.log
 sudo touch /var/log/nginx/$domain.error.log
 sudo chown -R www-data:www-data /var/log/nginx/$domain.*
 
-sudo mkdir -p /var/lib/letsencrypt/.well-known
-sudo chgrp www-data /var/lib/letsencrypt
-sudo chmod g+s /var/lib/letsencrypt
-
 sudo ln -s /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
 sudo systemctl restart nginx.service
 
-cat > /tmp/certbotnginx << EOF
-  location ^~ /.well-known/acme-challenge/ {
-  allow all;
-  root /var/lib/letsencrypt/;
-  default_type "text/plain";
-  try_files $uri =404;
-}
-EOF
 
-
-sudo cp /tmp/certbotnginx /etc/nginx/snippets/well-known
 
 sudo certbot --nginx -m admin@$domain -d $domain -d www.$domain
 
