@@ -109,9 +109,20 @@ sudo chown -R www-data:www-data /var/log/nginx/$domain.*
 sudo ln -s /etc/nginx/sites-available/$domain /etc/nginx/sites-enabled/
 sudo systemctl restart nginx.service
 
-
-
 sudo certbot --nginx -m admin@$domain -d $domain
+
+RUN_certbotE=$(expect -c "
+
+set timeout 10
+spawn sudo certbot --nginx -m admin@$domain -d $domain 
+expect Y\"(A)gree\/(C)ancel:\"
+send \"A\r\"
+expect Y\"(Y)es\/(N)o\"
+send \"A\r\"
+expect Y\"Select the appropriate number \[1-2\] then \[enter\] (press \'c\' to cancel):\"
+send \"2\r\"
+")
+echo "$RUN_certbot"
 
 (crontab -l ; echo "0 1 * * * /usr/bin/certbot renew & > /dev/null") | crontab
 
