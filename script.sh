@@ -73,7 +73,7 @@ server {
     listen 80;
     listen [::]:80;
 
-    server_name  $domain www.$domain;
+    server_name  $domain;
     root   /var/www/html/$domain;
     index  index.php;
     
@@ -111,7 +111,7 @@ sudo systemctl restart nginx.service
 
 
 
-sudo certbot --nginx -m admin@$domain -d $domain -d www.$domain
+sudo certbot --nginx -m admin@$domain -d $domain
 
 sudo cat >> /var/spool/cron/crontabs/ubuntu << 'EOF'
 0 1 * * * /usr/bin/certbot renew & > /dev/null
